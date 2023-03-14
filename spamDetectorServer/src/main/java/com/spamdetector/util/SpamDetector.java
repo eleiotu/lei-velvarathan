@@ -3,6 +3,8 @@ package com.spamdetector.util;
 import com.spamdetector.domain.TestFile;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 
@@ -12,12 +14,13 @@ import java.util.*;
  */
 public class SpamDetector {
 
-    public List<TestFile> trainAndTest(File mainDirectory) {
+    public List<TestFile> trainAndTest(File mainDirectory) throws FileNotFoundException {
 //          TODO: main method of loading the directories and files, training and testing the model
 
         Map<String, Integer> trainHam1Freq = new TreeMap<>();
         Map<String, Integer> trainHam2Freq = new TreeMap<>();
         Map<String, Integer> trainSpamFreq = new TreeMap<>();
+        Map<String, Integer> trainHamFreq = new TreeMap<>();
 
         //TRAINING PHASE
 
@@ -25,32 +28,24 @@ public class SpamDetector {
 
         //HAM 1
 
-
-        URL ham1Url = this.getClass().getClassLoader().getResource("/ham1");
-
-
+        //Loads the directory of ham and runs the
+        URL ham1Url = this.getClass().getClassLoader().getResource("/data/train/ham");
         File ham1Directory = null;
 
         try {
             ham1Directory = new File(ham1Url.toURI());
-            System.out.print("got here");
+
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-        /*
-
-
-        File[] filesInDir = ham1Directory.listFiles();
-        int numFiles = filesInDir.length;
 
         // iterate over each file in the dir and count their words
-
-
         trainHam1Freq = fileIterator(ham1Directory);
 
         //HAM 2
 
-        URL ham2Url = this.getClass().getClassLoader().getResource("/ham2");
+        //Same process as above but for second ham folder
+        URL ham2Url = this.getClass().getClassLoader().getResource("/data/train/ham2");
 
         File ham2Directory = null;
         try {
@@ -61,7 +56,62 @@ public class SpamDetector {
 
         trainHam2Freq = fileIterator(ham2Directory);
 
-        */
+        //Merge ham1 and ham2
+        trainHamFreq = mergeTrees(trainHam1Freq, trainHam2Freq);
+
+
+        //Train spam
+        URL spamUrl = this.getClass().getClassLoader().getResource("/data/train/spam");
+
+        File spamDirectory = null;
+        try {
+            spamDirectory = new File(spamUrl.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        trainSpamFreq = fileIterator(spamDirectory);
+
+
+
+        //Create probabilities of each
+        //should be a tree map with <Word, Spam/Ham Probability>
+        //Spam/Ham probability is determined by #num files containing word / total files
+
+        //Initialize probability trees
+        Map<String, Double> spamProb = new TreeMap<>();
+        Map<String, Double> hamProb = new TreeMap<>();
+
+        //Loop thru spam freq, then for each word calculate its probability
+        //For spamFreq calculate spam probabilities and same for hamFreq
+
+        //spamProb
+        Set<String> spamKeys = trainSpamFreq.keySet();
+        Iterator<String> keyIteratorSpam = spamKeys.iterator();
+        int numFilesSpam = spamDirectory.listFiles().length;
+        while (keyIteratorSpam.hasNext()){
+            String wordSpam  = keyIteratorSpam.next();
+            Double spamProbability = (double) (trainSpamFreq.get(wordSpam) / numFilesSpam);
+            spamProb.put(wordSpam, spamProbability);
+
+        }
+
+
+        //hamProb
+        Set<String> hamKeys = trainHamFreq.keySet();
+        Iterator<String> keyIteratorHam = hamKeys.iterator();
+        int numFilesHam = ham1Directory.listFiles().length + ham2Directory.listFiles().length;
+        while (keyIteratorHam.hasNext()){
+            String wordHam  = keyIteratorHam.next();
+            Double hamProbability = (double) (trainHamFreq.get(wordHam) / numFilesHam);
+            hamProb.put(wordHam, hamProbability);
+
+        }
+
+
+
+
+        System.out.print("We reached the end!!");
         return new ArrayList<TestFile>();
     }
 
@@ -84,7 +134,9 @@ public class SpamDetector {
 
                 if(freq.containsKey(word)){
                     // increment
-                    freq.put(word, count + 1);
+                    int oldCount = freq.get(word);
+
+                    freq.put(word, count + oldCount);
                 }
                 else{
                     freq.put(word, 1);
@@ -137,9 +189,34 @@ public class SpamDetector {
         return false;
     }
 
+    private Map<String, Integer> mergeTrees(Map<String, Integer> map1, Map<String, Integer> map2 )
+    {
+        Map<String, Integer> map3 = new TreeMap<>();
+
+        map3.putAll(map1);
+        Set<String> keys = map2.keySet();
+        Iterator<String> keyIterator = keys.iterator();
+        while (keyIterator.hasNext()){
+            String word  = keyIterator.next();
+            int count = map2.get(word);
+
+            if(map3.containsKey(word)){
+                // increment
+                int oldCount = map3.get(word);
+                map3.put(word, count + oldCount);
+            }
+            else{
+                map3.put(word, count);
+            }
+
+        }
+        return map3;
 
     }
 
 
+
 }
+
+
 
