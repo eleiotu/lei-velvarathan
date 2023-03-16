@@ -52,16 +52,16 @@ public class SpamDetector {
         //Same process as above but for second ham folder
         trainHam2Freq = fileIterator(ham2Directory);
 
-        //Merge ham1 and ham2
+        //Merge ham1 and ham2 into one tree map
         trainHamFreq = mergeTrees(trainHam1Freq, trainHam2Freq);
 
-        //Train spam
+        //Train spam, now the same for the spam folder
 
         trainSpamFreq = fileIterator(spamDirectory);
 
-        //Create probabilities of each
-        //should be a tree map with <Word, Spam/Ham Probability>
-        //Spam/Ham probability is determined by #num files containing word / total files
+        //Now we create our spam probabilities for each word
+        //We do this by going through each word in the frequency trees then finding out how much times they appeared in each file
+        //then divide by total amount of files
 
         //Initialize probability trees
         Map<String, Double> spamProb = new TreeMap<>();
@@ -104,14 +104,16 @@ public class SpamDetector {
         probabilityListSpam = testProbability(testSpamDirectory, spamProb, hamProb);
 
 
-
+        //combining the lists of both spam and ham training
         probabilityListSpam.addAll(probabilityListHam);
 
 
-
+        //return final list
         return probabilityListSpam;
     }
-
+    
+    
+    //function that iterates through each file in directory and checks the frequency of the words in it
     private  Map<String, Integer> fileIterator(File dir) throws FileNotFoundException {
         File[] filesInDir = dir.listFiles();
         int numFiles = filesInDir.length;
@@ -144,7 +146,8 @@ public class SpamDetector {
         return freq;
 
     }
-
+    
+    //given a file iterates through the words in the file creating a tree and updating it if new word is found
     private Map<String, Integer> checkWord(File rootFile) throws FileNotFoundException {
         //traverse through given file
         //then update each word with a +1 if its found in that file
@@ -168,8 +171,8 @@ public class SpamDetector {
 
         return trainFreq;
     }
-
-
+    
+    //checks if given string is a word 
     private Boolean isWord(String word){
         if (word == null){
             return false;
@@ -182,7 +185,8 @@ public class SpamDetector {
         }
         return false;
     }
-
+    
+    //merges the maps of two tree maps 
     private Map<String, Integer> mergeTrees(Map<String, Integer> map1, Map<String, Integer> map2 )
     {
         Map<String, Integer> map3 = new TreeMap<>();
@@ -207,7 +211,9 @@ public class SpamDetector {
         return map3;
 
     }
-
+    
+    
+    //this function iterates through each file given in the directory and calculates the spam probability of each word 
     private ArrayList<TestFile> testProbability(File dir, Map<String, Double> spamFreq, Map<String, Double> hamFreq) throws FileNotFoundException {
         ArrayList<TestFile> list = new ArrayList<TestFile>();
         File[] filesInDir = dir.listFiles();
@@ -233,15 +239,15 @@ public class SpamDetector {
                     {
                         double wordProbability = calculateWordProbability(word, spamFreq, hamFreq);
                         fileEta += wordProbability;
-                        //System.out.print("fileEta at i: " + i + fileEta);
+                        
                     }
 
                 }
             }
 
-            //System.out.print("fileEta: " + fileEta);
+            //calculates the files probability of being spam given through all the words
             fileProb = 1 / (1 + Math.pow(Math.E, fileEta));
-            //System.out.print("fileProb" + fileProb);
+            
 
             //Create new TestFile object then append it to the arraylist
             TestFile newTest = new TestFile(filesInDir[i].getName(), fileProb, dir.getName());
@@ -251,7 +257,8 @@ public class SpamDetector {
 
         return list;
     }
-
+    
+    //given a word searches through the given frequency maps and determines its spam probability
     private double calculateWordProbability(String word, Map<String, Double> spamFreq, Map<String, Double> hamFreq) {
 
         //Gets the spam and ham probability of the word. Returns 0 if not in map
@@ -280,12 +287,13 @@ public class SpamDetector {
         double wordProb = 0.0;
 
         if(wordIsSpam!=0.0){wordProb = Math.log(1.0 - wordIsSpam) - Math.log(wordIsSpam);}
-        //System.out.print("Word prob" + wordProb);
+        
 
         return wordProb;
 
     }
-
+    
+    //takes a URL and creates a directory from that safely
     private File createDirectory(URL url){
         File dir = null;
         try {
