@@ -42,19 +42,20 @@ public class SpamResource {
     @Produces("application/json")
     public Response getSpamResults() throws FileNotFoundException {
 //       TODO: return the test results list of TestFile, return in a Response object
-        String val = "{\"Not\": \"set\"}";
+        String val = "[";
         List<TestFile> spamList = this.trainAndTest();
 
-        System.out.print(spamList.size());
+
 
         try{
             for(int i = 0; i < spamList.size(); i++){
-                val = objectMapper.writeValueAsString(spamList.get(i));
+                val += objectMapper.writeValueAsString(spamList.get(i)) + ",";
             }
         }catch(JsonProcessingException e){
             throw new RuntimeException(e);
         }
-
+        val = val.substring(0, val.length()-1);
+        val+= "]";
 
 
         Response myResp = Response.status(200).header("Access-Control-Allow-Origin", "http://localhost:8448")
@@ -68,8 +69,11 @@ public class SpamResource {
     @GET
     @Path("/accuracy")
     @Produces("application/json")
-    public Response getAccuracy() {
+    public Response getAccuracy() throws FileNotFoundException {
 //      TODO: return the accuracy of the detector, return in a Response object
+        List<TestFile> spamList = this.trainAndTest();
+
+
 
         return null;
     }
