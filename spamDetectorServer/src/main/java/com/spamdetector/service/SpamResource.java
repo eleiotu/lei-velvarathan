@@ -28,7 +28,7 @@ public class SpamResource {
 
 
     SpamResource() throws FileNotFoundException {
-//       TODO: load resources, train and test to improve performance on the endpoint calls
+
         System.out.print("Training and testing the model, please wait");
 
 //      TODO: call  this.trainAndTest();
@@ -46,7 +46,7 @@ public class SpamResource {
         List<TestFile> spamList = this.trainAndTest();
 
 
-
+        //maps the TestFile object into string using the JSON properties and objectmapper
         try{
             for(int i = 0; i < spamList.size(); i++){
                 val += objectMapper.writeValueAsString(spamList.get(i)) + ",";
@@ -54,10 +54,12 @@ public class SpamResource {
         }catch(JsonProcessingException e){
             throw new RuntimeException(e);
         }
+        
+        //json formatting
         val = val.substring(0, val.length()-1);
         val+= "]";
 
-
+        //returns as response
         Response myResp = Response.status(200).header("Access-Control-Allow-Origin", "http://localhost:8448")
                 .header("Content-Type", "application/json")
                 .entity(val)
@@ -94,7 +96,7 @@ public class SpamResource {
             this.detector = new SpamDetector();
         }
 
-//        TODO: load the main directory "data" here from the Resources folder
+
 
         URL url = this.getClass().getClassLoader().getResource("/data");
         File data = null;
