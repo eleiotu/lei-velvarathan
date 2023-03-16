@@ -18,21 +18,107 @@
 
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/main.css">
+  <style>
+
+    .blue-column {
+      width: 200px;
+      height: 100vh;
+      background-color: blue;
+      float: left;
+    }
+    .yellow-column {
+      width: 200px;
+      height: 100vh;
+      background-color: yellow;
+      float: right;
+    }
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: orange;
+      height: 50px;
+      text-align: center;
+      color: white;
+      font-size: 20px;
+      line-height: 50px;
+    }
+
+    .main-content {
+      margin-left: 220px;
+      margin-right: 220px;
+    }
+  </style>
 
   <meta name="theme-color" content="#fafafa">
 </head>
 
 <body>
 
-  <!-- Add your site or application content here -->
+  <header style="background-color: orange;">
+    <h1 style="margin: 0; padding: 20px; color: blue;">Spam Detector Results</h1>
+  </header>
+
+  <div class="blue-column">
+    <nav>
+      <ul>
+        <li><a class="active" href="index.html" style="color: white;">Dashboard</a></li>
+        <li><a href="about.html"style="color: white;">About</a></li>
+      </ul>
+    </nav>
+  </div>
+
+<div class="yellow-column">
+  <div id="summary-stats">
+    <p>Accuracy: <span id="accuracy"></span></p>
+    <p>Precision: <span id="precision"></span></p>
+  </div>
+</div>
+
+<div class="main-content">
+
+  <table>
+    <thead>
+    <tr>
+      <th>File</th>
+      <th>Spam Probability (%)</th>
+      <th>Class</th>
+    </tr>
+    </thead>
+    <tbody id="results"></tbody>
+  </table>
+  <p>Accuracy API endpoint: <a href="http://localhost:8080/spamDetector-1.0/api/spam/accuracy">http://localhost:8080/spamDetector-1.0/api/spam/accuracy</a></p>
+  <p>Precision API endpoint: <a href="http://localhost:8080/spamDetector-1.0/api/spam/precision">http://localhost:8080/spamDetector-1.0/api/spam/precision</a></p>
+</div>
 
 
 
-
-
-  <script src="js/vendor/modernizr-3.11.2.min.js"></script>
-  <script src="js/plugins.js"></script>
-  <script src="js/main.js"></script>
+<script src="js/vendor/modernizr-3.11.2.min.js"></script>
+<script src="js/plugins.js"></script>
+<script src="js/main.js"></script>
+  <script>
+    fetch('http://localhost:8080/spamDetector-1.0/api/spam')
+      .then(response => response.json())
+      .then(data => {
+        const resultsBody = document.getElementById('results');
+        data.forEach(result => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+                      <td>${result.filename}</td>
+                      <td>${result.spamProbability}</td>
+                      <td>${result.classification}</td>
+                  `;
+          resultsBody.appendChild(row);
+        });
+        const accuracySpan = document.getElementById('accuracy');
+        accuracySpan.textContent = `${data.accuracy}%`;
+        const precisionSpan = document.getElementById('precision');
+        precisionSpan.textContent = `${data.precision}`;
+      })
+      .catch(error => {
+        console.error('Error fetching results:', error);
+      });
+  </script>
 
   <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
   <script>
@@ -40,6 +126,11 @@
     ga('create', 'UA-XXXXX-Y', 'auto'); ga('set', 'anonymizeIp', true); ga('set', 'transport', 'beacon'); ga('send', 'pageview')
   </script>
   <script src="https://www.google-analytics.com/analytics.js" async></script>
+
+  <div class="footer">
+    This is the footer.
+  </div>
 </body>
+
 
 </html>
