@@ -21,8 +21,21 @@ public class SpamResource {
     SpamResource(){
 //        TODO: load resources, train and test to improve performance on the endpoint calls
         System.out.print("Training and testing the model, please wait");
+        
+        URL url = this.getClass().getClassLoader().getResource("/data");
+        File data = null;
+
+        try{
+            data = new File(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+
 
 //      TODO: call  this.trainAndTest();
+
+        detector.trainAndTest(data);
 
 
     }
