@@ -11,7 +11,7 @@ This project was create by Edison Lei and Nirujan Velvarathan
 ## Improvements
 We improved our model by making changes to our spam filter. We only include words in our frequency find if they consisted of letters. This removed a lot of unnecessary filler characters
 in emails such as from and to addresses and other email meta data. Secondly we improved our training by including both ham folders which increased the amount of data our program 
-took in which increased its accuracy
+took in which increased its accuracy. Changes to HTML styling include the change of colours on the webpage, redesign of format into a simplier user-interface. 
 
 
 ## How to Run
