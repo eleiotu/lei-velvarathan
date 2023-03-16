@@ -104,21 +104,10 @@ public class SpamDetector {
         probabilityListSpam = testProbability(testSpamDirectory, spamProb, hamProb);
 
 
-        /*
-        for(int i = 0; i < 20;i++ )
-        {
-            System.out.print("spamProbRounded: " + probabilityListHam.get(i).getSpamProbability() + " filename: " +
-                    probabilityListHam.get(i).getFilename() + " actualClass: " + probabilityListHam.get(i).getActualClass());
-        }
-        for(int i = 0; i < 20;i++ )
-        {
-            System.out.print("spamProbRounded: " + probabilityListSpam.get(i).getSpamProbability() + " filename: " +
-                    probabilityListSpam.get(i).getFilename() + " actualClass: " + probabilityListSpam.get(i).getActualClass());
-        }
 
         probabilityListSpam.addAll(probabilityListHam);
 
-         */
+
 
         return probabilityListSpam;
     }
